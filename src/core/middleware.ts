@@ -8,36 +8,32 @@ import { AppError, Unauthorized } from './app-error';
 import { config } from './config';
 import { parseToken, md5 } from './utils/security';
 
-function checkAuthToken(authToken) {
+async function checkAuthToken(authToken: string) {
     const objToken = parseToken(authToken);
-    return Users.findOne({
+    const users = await Users.findOne({
         where: { identical: objToken.identical },
-    })
-        .then((users) => {
-            if (_.isEmpty(users)) {
-                throw new Unauthorized();
-            }
-            return UserTokens.findOne({
-                where: {
-                    tokens: authToken,
-                    uid: users.id,
-                    expires_at: {
-                        [Op.gt]: moment().format('YYYY-MM-DD HH:mm:ss'),
-                    },
-                },
-            }).then((tokenInfo) => {
-                if (_.isEmpty(tokenInfo)) {
-                    throw new Unauthorized();
-                }
-                return users;
-            });
-        })
-        .then((users) => {
-            return users;
-        });
+    });
+    if (_.isEmpty(users)) {
+        throw new Unauthorized();
+    }
+
+    const tokenInfo = await UserTokens.findOne({
+        where: {
+            tokens: authToken,
+            uid: users.id,
+            expires_at: {
+                [Op.gt]: moment().format('YYYY-MM-DD HH:mm:ss'),
+            },
+        },
+    });
+    if (_.isEmpty(tokenInfo)) {
+        throw new Unauthorized();
+    }
+
+    return users;
 }
 
-function checkAccessToken(accessToken) {
+function checkAccessToken(accessToken: string) {
     return new Promise((resolve, reject) => {
         if (_.isEmpty(accessToken)) {
             reject(new Unauthorized());
