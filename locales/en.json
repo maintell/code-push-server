@@ -10,5 +10,8 @@
 	"Obtain": "Obtain",
 	"old password": "old password",
 	"new password": "new password",
-	"please login again": "please login again"
+	"please login again": "please login again",
+	"change success": "change success",
+	"Logout": "Logout",
+	"Register": "Register"
 }
